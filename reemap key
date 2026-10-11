@@ -1,0 +1,30 @@
+Use the `Scancode Map` registry value. Run PowerShell as Administrator:
+
+```powershell
+$path = "HKLM:\SYSTEM\CurrentControlSet\Control\Keyboard Layout"
+
+[byte[]]$map = @(
+  0x00,0x00,0x00,0x00,
+  0x00,0x00,0x00,0x00,
+  0x03,0x00,0x00,0x00,   # 2 mappings + 1
+  0x1F,0x00,0x4F,0x00,   # Numpad End/1 (0x4F) -> S (0x1F)
+  0x10,0x00,0x47,0x00,   # Numpad Home/7 (0x47) -> Q (0x10)
+  0x00,0x00,0x00,0x00
+)
+
+Set-ItemProperty -Path $path -Name "Scancode Map" -Value $map -Type Binary
+Restart-Computer
+```
+
+**Differences from PowerToys:**
+- It needs a **reboot** and applies to all users.
+- It works at the hardware level, so Numpad 1 and 7 become S and Q **even with Num Lock on**. PowerToys only remaps them when Num Lock is off.
+- It only affects the numpad keys. The separate End and Home keys are unchanged.
+
+**Undo:**
+```powershell
+Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Keyboard Layout" -Name "Scancode Map"
+Restart-Computer
+```
+
+If you remove the registry remap but keep PowerToys, the two won't conflict, but you only need one of them.
